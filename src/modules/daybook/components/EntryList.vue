@@ -1,19 +1,41 @@
 <template>
   <div class="entry-list-container">
     <div class="px-2 pt-2">
-      <input type="text" class="form-control" placeholder="Buscar algo" />
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar algo"
+        v-model="search"
+      />
     </div>
     <div class="entry-scrollarea">
-      <entry-item v-for="item in 100" :key="item"></entry-item>
+      <entry-item
+        v-for="entry in entriesByTerm"
+        :key="entry.id"
+        :entry="entry"
+      ></entry-item>
     </div>
   </div>
 </template>
 
 <script>
 import { defineAsyncComponent } from "vue";
+import { mapGetters } from "vuex";
+
 export default {
   components: {
-    EntryItem: defineAsyncComponent(() => import("./EntryItem")),
+    EntryItem: defineAsyncComponent(() => import("./EntryItem.vue")),
+  },
+  computed: {
+    ...mapGetters("journal", ["getEntriesByTerm"]),
+    entriesByTerm() {
+      return this.getEntriesByTerm(this.search);
+    },
+  },
+  data() {
+    return {
+      search: "",
+    };
   },
 };
 </script>
