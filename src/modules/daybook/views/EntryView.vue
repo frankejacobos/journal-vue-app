@@ -1,38 +1,62 @@
 <template>
-  <div class="entry-title d-flex justify-content-between p-2">
-    <div class="entry-title d-flex">
-      <span class="text-success fs-4 fw-bold">1</span>
-      <span class="mx-1 fs-5">Septiembre</span>
-      <span class="mx-2 fw-light">2022</span>
+  <template v-if="entry">
+    <div class="entry-title d-flex justify-content-between p-2">
+      <div class="entry-title d-flex align-items-center">
+        <span class="text-success fs-4 fw-bold">{{ day }}</span>
+        <span class="mx-1 fs-5">{{ month }} {{ year }}</span>
+      </div>
+      <div>
+        <input
+          type="file"
+          @change="onFileChange"
+          ref="imageSelector"
+          v-show="false"
+          accept="image/*"
+        />
+        <button class="btn btn-danger mx-2" @click="onDelete">
+          Borrar
+          <i class="fa fa-trash-alt"></i>
+        </button>
+        <button class="btn btn-primary" @click="onSelectImage">
+          Subir foto
+          <i class="fa fa-upload"></i>
+        </button>
+      </div>
     </div>
-    <div>
-      <button class="btn btn-danger mx-2">
-        Borrar
-        <i class="fa fa-trash-alt"></i>
-      </button>
-      <button class="btn btn-primary">
-        Subir foto
-        <i class="fa fa-upload"></i>
-      </button>
+    <hr />
+    <div class="d-flex flex-column px-3 h-75">
+      <textarea
+        placeholder="¿Qué está pasando en el mundo 2022?"
+        v-model="entry.text"
+        class="form-control"
+        rows="10"
+      ></textarea>
     </div>
-  </div>
-  <hr />
-  <div class="d-flex flex-column px-3 h-75">
-    <textarea placeholder="¿Qué está pasando en el mundo 2022?"></textarea>
-  </div>
-  <fab-icon icon="fa-save"></fab-icon>
-  <img
-    src="https://images.unsplash.com/photo-1662049973637-1d019030406f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-    alt="entry-picture"
-    class="img-thumbnail"
-  />
+    <img
+      v-if="entry.picture && !localImage"
+      :src="entry.picture"
+      alt="entry-picture"
+      class="img-thumbnail"
+    />
+    <img
+      v-if="localImage"
+      :src="localImage"
+      alt="entry-picture"
+      class="img-thumbnail"
+    />
+    <fab-icon icon="fa-save" @on:click="onSave"></fab-icon>
+  </template>
 </template>
 
 <script>
 import { defineAsyncComponent } from "vue";
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
+import getDayMonthYear from "../helpers/getDayMonthYear";
+import Swal from "sweetalert2";
+import uploadImage from "../helpers/uploadImage";
 
 export default {
+  name: "EntryView",
   props: {
     id: {
       type: String,
@@ -42,17 +66,116 @@ export default {
   components: {
     FabIcon: defineAsyncComponent(() => import("../components/FabIcon.vue")),
   },
+  data() {
+    return {
+      entry: null,
+      localImage: null,
+      file: null,
+    };
+  },
   computed: {
     ...mapGetters("journal", ["getEntryById"]),
+    day() {
+      const { day } = getDayMonthYear(this.entry.date);
+      return day;
+    },
+    month() {
+      const { month } = getDayMonthYear(this.entry.date);
+      return month;
+    },
+    year() {
+      const { year } = getDayMonthYear(this.entry.date);
+      return year;
+    },
   },
   methods: {
+    ...mapActions("journal", ["createEntry", "updateEntry", "deleteEntry"]),
     getEntry() {
       const entry = this.getEntryById(this.id);
-      console.log(entry);
+      if (this.id === "new") {
+        this.entry = {
+          text: "",
+          date: new Date().getTime(),
+        };
+      } else {
+        if (!entry) return this.$router.push({ name: "no-entry" });
+        this.entry = entry;
+      }
+    },
+    async onSave() {
+      new Swal({
+        title: "Espere",
+        text: "Guardando información",
+        icon: "info",
+        allowOutsideClick: false,
+      });
+      Swal.showLoading();
+      const picture = await uploadImage(this.file);
+      this.entry.picture = picture;
+      if (this.entry.id) {
+        await this.updateEntry(this.entry);
+      } else {
+        const index = await this.createEntry(this.entry);
+        this.$router.push({ name: "entry", params: { id: index } });
+      }
+      Swal.fire({
+        title: "Guardado",
+        text: "Se guardó correctamente",
+        icon: "success",
+      });
+      this.localImage = null;
+    },
+    async onDelete() {
+      const { isConfirmed } = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: "No podrás revertir esta acción",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, borrar",
+        cancelButtonText: "Cancelar",
+      });
+      if (isConfirmed) {
+        new Swal({
+          title: "Espere",
+          text: "Borrando información",
+          icon: "info",
+          allowOutsideClick: false,
+        });
+        Swal.showLoading();
+        await this.deleteEntry(this.id);
+        this.$router.push({ name: "no-entry" });
+        Swal.fire({
+          title: "Borrado",
+          text: "Se borró correctamente",
+          icon: "success",
+        });
+      }
+    },
+    onFileChange(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        this.localImage = null;
+        this.file = null;
+        return;
+      }
+      this.file = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.localImage = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    onSelectImage() {
+      this.$refs.imageSelector.click();
     },
   },
   created() {
     this.getEntry();
+  },
+  watch: {
+    id() {
+      this.getEntry();
+    },
   },
 };
 </script>

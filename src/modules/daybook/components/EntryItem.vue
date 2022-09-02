@@ -15,29 +15,7 @@
 </template>
 
 <script>
-const months = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
-const days = [
-  "Domingo",
-  "Lunes",
-  "Martes",
-  "Miércoles",
-  "Jueves",
-  "Viernes",
-  "Sábado",
-];
+import getDayMonthYear from "../helpers/getDayMonthYear";
 export default {
   props: {
     entry: {
@@ -46,22 +24,20 @@ export default {
     },
   },
   computed: {
-    shortText() {
-      return this.entry.text.length > 100
-        ? this.entry.text.substr(0, 100) + "..."
-        : this.entry.text;
-    },
     day() {
-      const date = new Date(this.entry.date);
-      return date.getDate();
+      const { day } = getDayMonthYear(this.entry.date);
+      return day;
     },
     month() {
-      const date = new Date(this.entry.date);
-      return months[date.getMonth()];
+      const { month } = getDayMonthYear(this.entry.date);
+      return month;
     },
     year() {
-      const date = new Date(this.entry.date);
-      return date.getFullYear() + ", " + days[date.getDay()];
+      const { year } = getDayMonthYear(this.entry.date);
+      return year;
+    },
+    shortText() {
+      return this.entry.text.substring(0, 100);
     },
   },
 };
