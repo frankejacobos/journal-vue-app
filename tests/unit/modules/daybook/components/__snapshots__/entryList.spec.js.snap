@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Pruebas en el componente EntryList debe de llamar getEntriesByTerm con termino y retornar 0 entry 1`] = `
+<div class="entry-list-container">
+  <div class="px-2 pt-2"><input type="text" class="form-control" placeholder="Buscar algo"></div>
+  <div class="mt-2 d-flex flex-column"><button class="btn btn-primary m-3"><i class="fa fa-plus-circle"></i> Nueva entrada </button></div>
+  <div class="entry-scrollarea"></div>
+</div>
+`;
+
+exports[`Pruebas en el componente EntryList debe de llamar getEntriesByTerm con termino y retornar 1 entry 1`] = `
+<div class="entry-list-container">
+  <div class="px-2 pt-2"><input type="text" class="form-control" placeholder="Buscar algo"></div>
+  <div class="mt-2 d-flex flex-column"><button class="btn btn-primary m-3"><i class="fa fa-plus-circle"></i> Nueva entrada </button></div>
+  <div class="entry-scrollarea">
+    <entry-item-stub entry="[object Object]"></entry-item-stub>
+  </div>
+</div>
+`;
+
+exports[`Pruebas en el componente EntryList debe de llamar getEntriesByTerm sin termino y retornar 2 entries 1`] = `
+<div class="entry-list-container">
+  <div class="px-2 pt-2"><input type="text" class="form-control" placeholder="Buscar algo"></div>
+  <div class="mt-2 d-flex flex-column"><button class="btn btn-primary m-3"><i class="fa fa-plus-circle"></i> Nueva entrada </button></div>
+  <div class="entry-scrollarea">
+    <entry-item-stub entry="[object Object]"></entry-item-stub>
+    <entry-item-stub entry="[object Object]"></entry-item-stub>
+  </div>
+</div>
+`;

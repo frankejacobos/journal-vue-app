@@ -135,7 +135,7 @@ export default {
         cancelButtonText: "Cancelar",
       });
       if (isConfirmed) {
-        new Swal({
+        Swal.fire({
           title: "Espere",
           text: "Borrando información",
           icon: "info",
