@@ -33,3 +33,7 @@ export const deleteEntry = async ({ commit }, id) => {
   await journalApi.delete(`/entries/${id}.json`);
   commit("deleteEntry", id);
 };
+
+export const clearEntries = ({ commit }) => {
+  commit("clearEntries");
+};

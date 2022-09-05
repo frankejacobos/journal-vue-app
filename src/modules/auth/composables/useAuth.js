@@ -12,7 +12,8 @@ const useAuth = () => {
     return resp;
   };
   const logout = () => {
-    return store.dispatch("auth/logout");
+    store.dispatch("auth/logout");
+    store.dispatch("journal/clearEntries");
   };
   const signup = async (user) => {
     const resp = await store.dispatch("auth/signup", user);
@@ -24,6 +25,7 @@ const useAuth = () => {
     logout,
     isAuthenticated,
     authStatus: computed(() => store.getters["auth/authStatus"]),
+    username: computed(() => store.getters["auth/username"]),
   };
 };
 

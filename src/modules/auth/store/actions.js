@@ -48,14 +48,14 @@ export const login = async ({ commit }, user) => {
 };
 
 export const logout = async ({ commit }) => {
-  commit("setUser", null);
+  commit("logout");
 };
 
 export const isAuthenticated = async ({ commit }) => {
   const idToken = localStorage.getItem("idToken");
   const refreshToken = localStorage.getItem("refreshToken");
   if (!idToken || !refreshToken) {
-    commit("setUser", null);
+    commit("logout");
     return { ok: false, message: "Usuario no autenticado" };
   }
   try {
@@ -67,7 +67,7 @@ export const isAuthenticated = async ({ commit }) => {
     commit("setUser", { user, idToken, refreshToken });
     return { ok: true, message: "Usuario autenticado correctamente" };
   } catch (error) {
-    commit("setUser", null);
+    commit("logout");
     return { ok: false, message: "Usuario no autenticado" };
   }
 };
