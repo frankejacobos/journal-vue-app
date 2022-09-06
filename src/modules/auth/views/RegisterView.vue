@@ -58,9 +58,9 @@ export default {
     const router = useRouter();
     const { signup } = useAuth();
     const userForm = ref({
-      name: "name",
-      email: "email@gmail.com",
-      password: "2@3#4$5%",
+      name: "",
+      email: "",
+      password: "",
     });
     return {
       userForm,
