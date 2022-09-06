@@ -14,13 +14,13 @@ export const signup = async ({ commit }, user) => {
       idToken,
     });
     delete user.password;
-    commit("setUser", { user, idToken, refreshToken });
+    commit("login", { user, idToken, refreshToken });
     return { ok: true, message: "Usuario registrado correctamente" };
   } catch (error) {
     const message =
       error.response.data.error.message === "EMAIL_EXISTS"
         ? "Correo ya registrado"
-        : "Error al crear usuario";
+        : error.response.data.error.message;
     return { ok: false, message: message };
   }
 };
@@ -36,13 +36,15 @@ export const login = async ({ commit }, user) => {
     const { idToken, refreshToken, displayName } = data;
     user.name = displayName;
     delete user.password;
-    commit("setUser", { user, idToken, refreshToken });
+    commit("login", { user, idToken, refreshToken });
     return { ok: true, message: "Usuario logueado correctamente" };
   } catch (error) {
     const message =
       error.response.data.error.message === "EMAIL_NOT_FOUND"
         ? "Correo no registrado"
-        : "Contraseña incorrecta";
+        : error.response.data.error.message === "INVALID_PASSWORD"
+        ? "Contraseña incorrecta"
+        : error.response.data.error.message;
     return { ok: false, message: message };
   }
 };
@@ -64,7 +66,7 @@ export const isAuthenticated = async ({ commit }) => {
     });
     const { email, displayName } = data.users[0];
     const user = { email, name: displayName };
-    commit("setUser", { user, idToken, refreshToken });
+    commit("login", { user, idToken, refreshToken });
     return { ok: true, message: "Usuario autenticado correctamente" };
   } catch (error) {
     commit("logout");
